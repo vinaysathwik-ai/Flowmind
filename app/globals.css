@@ -1,0 +1,278 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ============================================================
+   FLOWMIND DESIGN SYSTEM — CSS CUSTOM PROPERTIES
+   ============================================================ */
+:root {
+  /* Brand Colors */
+  --color-brand-purple: #534AB7;
+  --color-purple-light: #EEEDFE;
+  --color-purple-dark: #3C3489;
+
+  /* Teal */
+  --color-teal: #0F6E56;
+  --color-teal-light: #E1F5EE;
+
+  /* Red */
+  --color-red: #A32D2D;
+  --color-red-light: #FCEBEB;
+
+  /* Amber */
+  --color-amber: #854F0B;
+  --color-amber-light: #FAEEDA;
+
+  /* Gray */
+  --color-gray: #888780;
+  --color-gray-light: #F1EFE8;
+
+  /* Surface */
+  --color-surface: #FFFFFF;
+  --color-surface-secondary: #F8F7FF;
+  --color-surface-tertiary: #F1EFE8;
+
+  /* Text */
+  --color-text-primary: #1A1830;
+  --color-text-secondary: #4A4867;
+  --color-text-muted: #888780;
+
+  /* Borders */
+  --color-border: rgba(83, 74, 183, 0.12);
+  --color-border-secondary: rgba(83, 74, 183, 0.2);
+
+  /* Shadcn compatibility */
+  --background: 0 0% 100%;
+  --foreground: 245 20% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 245 20% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 245 20% 10%;
+  --primary: 245 43% 50%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 245 43% 96%;
+  --secondary-foreground: 245 43% 35%;
+  --muted: 245 20% 96%;
+  --muted-foreground: 245 10% 46%;
+  --accent: 245 43% 96%;
+  --accent-foreground: 245 43% 35%;
+  --destructive: 0 58% 40%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 245 20% 90%;
+  --input: 245 20% 90%;
+  --ring: 245 43% 50%;
+  --radius: 0.5rem;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 245 20% 10%;
+  --sidebar-primary: 245 43% 50%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 245 43% 96%;
+  --sidebar-accent-foreground: 245 43% 35%;
+  --sidebar-border: 245 20% 90%;
+  --sidebar-ring: 245 43% 50%;
+}
+
+.dark {
+  /* Brand stays purple — no blue anywhere */
+  --color-surface: #100F1C;
+  --color-surface-secondary: #18162C;
+  --color-surface-tertiary: #1E1C32;
+  --color-text-primary: #EEEDF8;
+  --color-text-secondary: #B0ADCE;
+  --color-text-muted: #6E6C92;
+  --color-border: rgba(160, 150, 240, 0.10);
+  --color-border-secondary: rgba(160, 150, 240, 0.18);
+  --color-purple-light: #252060;
+  --color-gray-light: #28273A;
+  --color-red-light: #321418;
+  --color-teal-light: #0B2418;
+  --color-amber-light: #291608;
+
+  /* Shadcn — pure purple/neutral, zero blue */
+  --background: 246 32% 8%;
+  --foreground: 246 20% 94%;
+  --card: 246 28% 10%;
+  --card-foreground: 246 20% 94%;
+  --popover: 246 28% 10%;
+  --popover-foreground: 246 20% 94%;
+  --primary: 245 43% 62%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 246 28% 15%;
+  --secondary-foreground: 246 18% 82%;
+  --muted: 246 28% 15%;
+  --muted-foreground: 246 12% 52%;
+  --accent: 246 28% 15%;
+  --accent-foreground: 246 18% 82%;
+  --destructive: 0 55% 48%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 246 28% 17%;
+  --input: 246 28% 17%;
+  --ring: 245 43% 62%;
+
+  --sidebar-background: 246 32% 8%;
+  --sidebar-foreground: 246 20% 94%;
+  --sidebar-primary: 245 43% 62%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 246 28% 15%;
+  --sidebar-accent-foreground: 246 18% 82%;
+  --sidebar-border: 246 28% 17%;
+  --sidebar-ring: 245 43% 62%;
+}
+
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 14px;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-surface-tertiary);
+  color: var(--color-text-primary);
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   FLOWMIND UTILITY CLASSES
+   ============================================================ */
+
+/* Priority badge colors */
+.badge-critical {
+  background-color: var(--color-red-light);
+  color: var(--color-red);
+  border: 0.5px solid color-mix(in srgb, var(--color-red) 20%, transparent);
+}
+.badge-high {
+  background-color: var(--color-amber-light);
+  color: var(--color-amber);
+  border: 0.5px solid color-mix(in srgb, var(--color-amber) 20%, transparent);
+}
+.badge-medium {
+  background-color: var(--color-purple-light);
+  color: var(--color-brand-purple);
+  border: 0.5px solid color-mix(in srgb, var(--color-brand-purple) 20%, transparent);
+}
+.badge-low {
+  background-color: var(--color-teal-light);
+  color: var(--color-teal);
+  border: 0.5px solid color-mix(in srgb, var(--color-teal) 20%, transparent);
+}
+.badge-deferred {
+  background-color: var(--color-gray-light);
+  color: var(--color-gray);
+  border: 0.5px solid color-mix(in srgb, var(--color-gray) 20%, transparent);
+}
+.badge-ai {
+  background-color: var(--color-purple-light);
+  color: var(--color-brand-purple);
+  border: 0.5px solid color-mix(in srgb, var(--color-brand-purple) 15%, transparent);
+}
+
+/* Timeline/routine color bars */
+.bar-purple { background-color: var(--color-brand-purple); }
+.bar-green  { background-color: var(--color-teal); }
+.bar-amber  { background-color: #D97706; }
+.bar-gray   { background-color: var(--color-gray); }
+.bar-red    { background-color: var(--color-red); }
+
+/* Habit dots */
+.habit-dot-done    { background-color: var(--color-brand-purple); }
+.habit-dot-pending { background-color: var(--color-purple-light); border: 1.5px solid var(--color-brand-purple); }
+.habit-dot-missed  { background-color: #E0DEEE; }
+
+/* Risk deadline bars */
+.risk-bar-red    { background-color: var(--color-red); }
+.risk-bar-amber  { background-color: #D97706; }
+.risk-bar-purple { background-color: var(--color-brand-purple); }
+
+/* Cards */
+.card-base {
+  background-color: var(--color-surface);
+  border: 0.5px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+}
+.card-raised {
+  background-color: var(--color-surface);
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+}
+.card-critical-border {
+  border-left: 2px solid var(--color-red) !important;
+}
+
+/* Sidebar nav */
+.nav-item-active {
+  background-color: var(--color-purple-light);
+  color: var(--color-brand-purple);
+  font-weight: 500;
+  border-left: 2px solid var(--color-brand-purple);
+}
+.nav-item-inactive {
+  color: var(--color-text-secondary);
+  border-left: 2px solid transparent;
+}
+
+/* AI pulsing dot */
+@keyframes ai-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(0.85); }
+}
+.ai-pulse-dot {
+  animation: ai-pulse 2s ease-in-out infinite;
+  background-color: var(--color-teal);
+}
+
+/* Voice button ring animation */
+@keyframes voice-ring {
+  0%   { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+.voice-ring {
+  animation: voice-ring 1.2s ease-out infinite;
+}
+
+/* Smooth fade in */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fade-in 0.3s ease-out forwards; }
+
+/* Stagger children */
+.stagger-children > * {
+  animation: fade-in 0.3s ease-out both;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 60ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 180ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 240ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 300ms; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background-color: var(--color-border-secondary); border-radius: 99px; }
+
+/* Deferred task opacity */
+.task-deferred { opacity: 0.55; }
+
+/* Completed task strikethrough */
+.task-completed { text-decoration: line-through; opacity: 0.6; }
+
+/* Focus ring override */
+*:focus-visible {
+  outline: 2px solid var(--color-brand-purple);
+  outline-offset: 2px;
+}
