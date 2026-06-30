@@ -76,7 +76,7 @@ export default function LoginPage() {
     if (!isSupabaseConfigured()) { mockFallback(); return; }
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -85,7 +85,15 @@ export default function LoginPage() {
         },
       });
       if (error) throw error;
-      setMessage({ text: 'Check your email to confirm your account!', type: 'success' });
+      
+      if (data?.session) {
+        setMessage({ text: 'Sign up successful! Redirecting to dashboard...', type: 'success' });
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 1500);
+      } else {
+        setMessage({ text: 'Check your email to confirm your account!', type: 'success' });
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Sign up failed';
       setMessage({ text: msg, type: 'error' });

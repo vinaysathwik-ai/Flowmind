@@ -444,7 +444,11 @@ export default function DashboardPage() {
 
         {/* Right Column: AI Insight */}
         <div>
-          <AIInsightBanner insight={insight} />
+          <AIInsightBanner
+            insight={insight}
+            loading={briefLoading}
+            onRegenerate={handleRegenerateBrief}
+          />
         </div>
       </div>
     </div>

@@ -1,16 +1,18 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { BrainCircuit, ChevronRight } from 'lucide-react';
+import { BrainCircuit, RefreshCw } from 'lucide-react';
 import type { AIInsight } from '@/types';
 import ActionChip from '@/components/ai/ActionChip';
 
 interface AIInsightBannerProps {
   insight: AIInsight;
   userName?: string;
+  loading?: boolean;
+  onRegenerate?: () => void;
 }
 
-export default function AIInsightBanner({ insight, userName }: AIInsightBannerProps) {
+export default function AIInsightBanner({ insight, userName, loading, onRegenerate }: AIInsightBannerProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -28,29 +30,47 @@ export default function AIInsightBanner({ insight, userName }: AIInsightBannerPr
 
         {/* Content */}
         <div className="flex-1 min-w-0 space-y-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between">
             <span className="text-[10px] uppercase tracking-widest font-medium"
               style={{ color: 'var(--color-brand-purple)' }}>
               AI insight · Today
             </span>
+            
+            {onRegenerate && (
+              <button
+                onClick={onRegenerate}
+                disabled={loading}
+                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] disabled:opacity-50"
+                title="Regenerate AI Brief"
+              >
+                <RefreshCw size={12} className={loading ? 'animate-spin' : ''} />
+              </button>
+            )}
           </div>
 
+          {/* Summary / Greeting */}
+          {insight.summary && (
+            <p className="text-xs font-medium" style={{ color: 'var(--color-text-primary)' }}>
+              {insight.summary}
+            </p>
+          )}
+
           {/* At-risk highlight */}
-          {insight.at_risk_tasks.length > 0 && (
-            <div>
-              <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
-                Your <span style={{ color: 'var(--color-red)' }}>{insight.at_risk_tasks[0].title}</span> task is at risk.
+          {insight.at_risk_tasks && insight.at_risk_tasks.length > 0 && (
+            <div className="pt-1">
+              <p className="text-xs font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                ⚠️ Task at risk: <span style={{ color: 'var(--color-red)' }}>{insight.at_risk_tasks[0].title}</span>
               </p>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
-                {insight.at_risk_tasks[0].reason}
+              <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
+                Reason: {insight.at_risk_tasks[0].reason}
               </p>
             </div>
           )}
 
           {/* Actions taken */}
-          {insight.actions_taken.length > 0 && (
-            <div>
-              <p className="text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>I scheduled:</p>
+          {insight.actions_taken && insight.actions_taken.length > 0 && (
+            <div className="pt-1">
+              <p className="text-[11px] font-semibold mb-1" style={{ color: 'var(--color-text-secondary)' }}>Today's Plan:</p>
               <ul className="space-y-1">
                 {insight.actions_taken.map((action, i) => (
                   <li key={i} className="flex items-center gap-2 text-xs" style={{ color: 'var(--color-text-primary)' }}>
@@ -63,9 +83,9 @@ export default function AIInsightBanner({ insight, userName }: AIInsightBannerPr
           )}
 
           {/* Deferred */}
-          {insight.deferred_tasks.length > 0 && (
-            <div>
-              <p className="text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>I deferred:</p>
+          {insight.deferred_tasks && insight.deferred_tasks.length > 0 && (
+            <div className="pt-1">
+              <p className="text-[11px] font-semibold mb-1" style={{ color: 'var(--color-text-secondary)' }}>Deferred items:</p>
               <ul className="space-y-1">
                 {insight.deferred_tasks.map((task, i) => (
                   <li key={i} className="flex items-center gap-2 text-xs" style={{ color: 'var(--color-text-muted)' }}>
@@ -78,11 +98,13 @@ export default function AIInsightBanner({ insight, userName }: AIInsightBannerPr
           )}
 
           {/* Recommendation */}
-          <div className="rounded-md px-3 py-2" style={{ background: 'var(--color-purple-light)' }}>
-            <p className="text-xs" style={{ color: 'var(--color-purple-dark)' }}>
-              💡 {insight.recommendation}
-            </p>
-          </div>
+          {insight.recommendation && (
+            <div className="rounded-md px-3 py-2" style={{ background: 'var(--color-purple-light)' }}>
+              <p className="text-xs" style={{ color: 'var(--color-purple-dark)' }}>
+                💡 {insight.recommendation}
+              </p>
+            </div>
+          )}
 
           {/* Action chips */}
           <div className="flex flex-wrap gap-2 pt-1">
