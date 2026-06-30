@@ -2,12 +2,29 @@ import { NextResponse } from 'next/server';
 import webpush from 'web-push';
 import { createClient } from '@/lib/supabase/server';
 
-// Configure VAPID once
-webpush.setVapidDetails(
-  `mailto:${process.env.VAPID_EMAIL ?? 'admin@flowmind.app'}`,
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-);
+// Lazy helper to configure VAPID only when needed (and avoid crashing during Next.js build-time)
+let isVapidInitialized = false;
+function initWebPush() {
+  if (isVapidInitialized) return true;
+
+  const email = process.env.VAPID_EMAIL || 'admin@flowmind.app';
+  const pubKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const privKey = process.env.VAPID_PRIVATE_KEY;
+
+  if (!pubKey || !privKey) {
+    console.warn('VAPID keys are missing. Skipping Web Push initialization.');
+    return false;
+  }
+
+  try {
+    webpush.setVapidDetails(`mailto:${email}`, pubKey, privKey);
+    isVapidInitialized = true;
+    return true;
+  } catch (err) {
+    console.error('Error setting VAPID details:', err);
+    return false;
+  }
+}
 
 // GET /api/notifications/check-deadlines
 // Checks for at-risk tasks and sends push notifications to affected users
@@ -18,6 +35,10 @@ export async function GET(request: Request) {
   const cronSecret = process.env.CRON_SECRET;
   if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  if (!initWebPush()) {
+    return NextResponse.json({ error: 'Web Push is not configured. VAPID keys are missing.' }, { status: 400 });
   }
 
   const supabase = await createClient();
