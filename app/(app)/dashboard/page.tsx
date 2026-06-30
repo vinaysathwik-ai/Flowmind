@@ -22,7 +22,17 @@ export default function DashboardPage() {
   const [tasks, setTasks] = useState<Task[]>(
     MOCK_TASKS.map(t => ({ ...t, subtasks: MOCK_SUBTASKS.filter(s => s.task_id === t.id) }))
   );
-  const [insight, setInsight] = useState<AIInsight>(MOCK_AI_INSIGHT);
+  const [insight, setInsight] = useState<AIInsight>(
+    isSupabaseConfigured()
+      ? {
+          summary: 'Analyzing your active tasks and priority scores...',
+          actions_taken: ['Connecting to workspace database'],
+          recommendation: 'Assessing workload priorities...',
+          at_risk_tasks: [],
+          deferred_tasks: [],
+        }
+      : MOCK_AI_INSIGHT
+  );
   const [greeting, setGreeting] = useState(MOCK_DAILY_BRIEF.greeting);
   const [recommendation, setRecommendation] = useState(MOCK_DAILY_BRIEF.recommendation);
   const [focusScore, setFocusScore] = useState(MOCK_METRICS.focus_score);
@@ -117,6 +127,24 @@ export default function DashboardPage() {
           setStreakDays(streak);
         }
 
+        // Calculate at-risk and deferred tasks dynamically from live data
+        const atRiskList = mapped.filter(t => {
+          if (!t.due_date || t.status === 'completed') return false;
+          const days = (new Date(t.due_date).getTime() - now.getTime()) / 86400000;
+          return (t.priority === 'critical' || t.priority === 'high') && days <= 3;
+        }).map(t => ({
+          task_id: t.id,
+          title: t.title,
+          priority: t.priority,
+          score: t.ai_score ?? 80,
+          reason: `Due ${new Date(t.due_date!).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`,
+          estimated_hours_remaining: t.estimated_hours ?? 0,
+        }));
+
+        const deferredList = mapped
+          .filter(t => (t.priority === 'low' || t.priority === 'deferred' || t.is_deferred) && t.status !== 'completed')
+          .map(t => t.title);
+
         // Fetch today's AI brief if exists
         const { data: storedBrief } = await supabase
           .from('daily_briefs')
@@ -128,13 +156,13 @@ export default function DashboardPage() {
         if (storedBrief?.summary) {
           const s = storedBrief.summary as { summary: string; actions_taken: string[]; recommendation: string };
           setInsight({
-            summary: s.summary ?? insight.summary,
-            actions_taken: s.actions_taken ?? insight.actions_taken,
-            recommendation: s.recommendation ?? insight.recommendation,
-            at_risk_tasks: insight.at_risk_tasks,
-            deferred_tasks: insight.deferred_tasks,
+            summary: s.summary ?? 'Your workload is analyzed and ready.',
+            actions_taken: s.actions_taken ?? ['Monitored active tasks'],
+            recommendation: s.recommendation ?? 'Complete outstanding priority items.',
+            at_risk_tasks: atRiskList,
+            deferred_tasks: deferredList,
           });
-          setRecommendation(storedBrief.recommendation ?? recommendation);
+          setRecommendation(storedBrief.recommendation ?? 'Complete outstanding priority items.');
         } else {
           // If no stored brief exists for today, automatically trigger generation
           setBriefLoading(true);
@@ -143,12 +171,13 @@ export default function DashboardPage() {
             if (res.ok) {
               const json = await res.json();
               if (json.brief) {
-                setInsight(prev => ({
-                  ...prev,
+                setInsight({
                   summary: json.brief.summary,
                   actions_taken: json.brief.actions_taken,
                   recommendation: json.brief.recommendation,
-                }));
+                  at_risk_tasks: atRiskList,
+                  deferred_tasks: deferredList,
+                });
                 setRecommendation(json.brief.recommendation);
                 setAtRiskCount(json.at_risk_count ?? atRisk);
               }
@@ -160,7 +189,7 @@ export default function DashboardPage() {
           }
         }
       } catch (err) {
-        console.error('Dashboard fetch error, using mock data:', err);
+        console.error('Dashboard fetch error:', err);
       }
     })();
   }, []);
@@ -173,12 +202,32 @@ export default function DashboardPage() {
       if (res.ok) {
         const json = await res.json();
         if (json.brief) {
-          setInsight(prev => ({
-            ...prev,
+          // Recalculate lists
+          const now = new Date();
+          const atRiskList = tasks.filter(t => {
+            if (!t.due_date || t.status === 'completed') return false;
+            const days = (new Date(t.due_date).getTime() - now.getTime()) / 86400000;
+            return (t.priority === 'critical' || t.priority === 'high') && days <= 3;
+          }).map(t => ({
+            task_id: t.id,
+            title: t.title,
+            priority: t.priority,
+            score: t.ai_score ?? 80,
+            reason: `Due ${new Date(t.due_date!).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`,
+            estimated_hours_remaining: t.estimated_hours ?? 0,
+          }));
+
+          const deferredList = tasks
+            .filter(t => (t.priority === 'low' || t.priority === 'deferred' || t.is_deferred) && t.status !== 'completed')
+            .map(t => t.title);
+
+          setInsight({
             summary: json.brief.summary,
             actions_taken: json.brief.actions_taken,
             recommendation: json.brief.recommendation,
-          }));
+            at_risk_tasks: atRiskList,
+            deferred_tasks: deferredList,
+          });
           setRecommendation(json.brief.recommendation);
           setAtRiskCount(json.at_risk_count ?? atRiskCount);
         }
